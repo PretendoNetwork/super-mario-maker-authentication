@@ -1,18 +1,16 @@
 package main
 
 import (
-	"go.mongodb.org/mongo-driver/bson"
-
 	nex "github.com/PretendoNetwork/nex-go"
 )
 
 func generateKerberosTicket(userPID uint32, serverPID uint32, keySize int) ([]byte, int) {
-	user := getUserByPID(userPID)
+	user := getNEXAccountByPID(userPID)
 	if user == nil {
 		return []byte{}, 0x80030064 // RendezVous::InvalidUsername
 	}
 
-	userPassword := user["nex"].(bson.M)["password"].(string)
+	userPassword := user["password"].(string)
 	serverPassword := "password"
 
 	// Create session key and ticket keys

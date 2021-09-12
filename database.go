@@ -20,10 +20,10 @@ func connectMongo() {
 	_ = mongoClient.Connect(mongoContext)
 
 	mongoDatabase = mongoClient.Database("pretendo")
-	mongoCollection = mongoDatabase.Collection("pnids")
+	mongoCollection = mongoDatabase.Collection("nexaccounts")
 }
 
-func getUserByPID(pid uint32) bson.M {
+func getNEXAccountByPID(pid uint32) bson.M {
 	var result bson.M
 
 	err := mongoCollection.FindOne(context.TODO(), bson.D{{Key: "pid", Value: pid}}, options.FindOne()).Decode(&result)
