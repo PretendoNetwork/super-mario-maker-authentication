@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 
 	nex "github.com/PretendoNetwork/nex-go"
@@ -28,7 +29,7 @@ func loginEx(err error, client *nex.Client, callID uint32, username string, auth
 	}
 
 	// Build the response body
-	stationURL := "prudps:/address=66.177.0.8;port=60003;CID=1;PID=2;sid=1;stream=10;type=2"
+	stationURL := "prudps:/address=" + os.Getenv("SECURE_SERVER_LOCATION") + ";port=" + os.Getenv("SECURE_SERVER_PORT") + ";CID=1;PID=2;sid=1;stream=10;type=2"
 	serverName := "Pretendo SMM"
 
 	rvConnectionData := nex.NewRVConnectionData()
