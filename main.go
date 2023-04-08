@@ -2,18 +2,24 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	nex "github.com/PretendoNetwork/nex-go"
-	nexproto "github.com/PretendoNetwork/nex-protocols-go"
+	"github.com/PretendoNetwork/nex-go"
+	"github.com/PretendoNetwork/nex-protocols-common-go/authentication"
 )
 
 var nexServer *nex.Server
 
 func main() {
 	nexServer = nex.NewServer()
-	nexServer.SetPrudpVersion(1)
-	nexServer.SetNexVersion(4)
-	nexServer.SetKerberosKeySize(32)
+	nexServer.SetPRUDPVersion(1)
+	nexServer.SetPRUDPProtocolMinorVersion(2)
+	nexServer.SetDefaultNEXVersion(&nex.NEXVersion{
+		Major: 3,
+		Minor: 8,
+		Patch: 3,
+	})
+	nexServer.SetKerberosPassword(os.Getenv("KERBEROS_PASSWORD"))
 	nexServer.SetAccessKey("9f2b4678")
 
 	nexServer.On("Data", func(packet *nex.PacketV1) {
@@ -25,13 +31,21 @@ func main() {
 		fmt.Println("===============")
 	})
 
-	authenticationServer := nexproto.NewAuthenticationProtocol(nexServer)
+	authenticationProtocol := authentication.NewCommonAuthenticationProtocol(nexServer)
 
-	// Handle LoginEx RMC method
-	authenticationServer.LoginEx(loginEx)
+	secureStationURL := nex.NewStationURL("")
+	secureStationURL.SetScheme("prudps")
+	secureStationURL.SetAddress(os.Getenv("SECURE_SERVER_LOCATION"))
+	secureStationURL.SetPort(os.Getenv("SECURE_SERVER_PORT"))
+	secureStationURL.SetCID("1")
+	secureStationURL.SetPID("2")
+	secureStationURL.SetSID("1")
+	secureStationURL.SetStream("10")
+	secureStationURL.SetType("2")
 
-	// Handle RequestTicket RMC method
-	authenticationServer.RequestTicket(requestTicket)
+	authenticationProtocol.SetSecureStationURL(secureStationURL)
+	authenticationProtocol.SetBuildName("Pretendo SMM")
+	authenticationProtocol.SetPasswordFromPIDFunction(passwordFromPID)
 
 	nexServer.Listen(":60002")
 }
